@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "Please cite the associated manuscript when using this reproduction package."
+title: "Hospital Care Continuity Under Fault-Constrained Distribution Restoration"
+type: software
+authors:
+  - family-names: Selim
+    given-names: Alaa
+  - family-names: Liu
+    given-names: Yitong
+  - family-names: Lichter
+    given-names: Katie
+  - family-names: Zhao
+    given-names: Junbo
