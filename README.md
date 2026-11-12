@@ -1,15 +1,53 @@
-# Hospital Care Continuity Under Fault-Constrained Distribution Restoration
+# Hospital care and grid resilience under feeder faults
 
-Numerical reproduction code for the IEEE PES General Meeting paper by Alaa Selim, Yitong Liu, Katie Lichter, and Junbo Zhao.
+This study schedules emergency care and backup power together during a feeder outage and staged restoration. It follows two storm scenarios, December 2023 and April 2024, on a modified IEEE 13-node feeder with three modeled hospitals.
 
-1. Download and extract [the numerical reproduction bundle](reproduction.zip).
-2. In the extracted directory, use Python 3.12 and run:
+## 1. Set up and run the study
 
-   ```sh
-   python -m pip install -r requirements.txt
-   python reproduce.py --skip-pdf
-   ```
+Download [the study files and datasets](reproduction.zip) and extract them. Open PowerShell in the extracted directory, where `reproduce.py` and `requirements.txt` are located. Use Python 3.12.
 
-The bundle contains the complete numerical workflow, archived solutions, solver bounds, aggregate public-source inputs and provenance, and TikZ result figures. The script checks the inputs and replays the archived schedules with OpenDSS. Hospital equipment, care cohorts, faults and switching times are modeled. See the included README.txt for model details and CITATION.cff for citation information.
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe reproduce.py --skip-pdf
+```
 
-The feeder files retain their upstream notice in feeder/License.txt.
+On macOS or Linux, use `python3.12 -m venv .venv` and replace `.\.venv\Scripts\python.exe` with `./.venv/bin/python`. The full run executes the stages below and writes CSVs and TikZ files into the extracted directory.
+
+## 2. Check the observations and build the scenarios
+
+Run `python analyze_evidence.py` using the environment above. It reads archived EAGLE-I outage snapshots for NH, VT, and ME and Maine's public county ED counts. It aligns records by local calendar date and compares ED visits with a weekday baseline from the preceding three weeks. Inspect `Observed_County_Daily_ED.csv` for the source counts and `Evidence_Daily.csv` for the derived ratios.
+
+In [`run_fault_study.py`](run_fault_study.py), start with `scenario()`. It loads the modeled cohorts and places the simulated fault at the recorded Kennebec County outage peak. The model uses county ED ratios to scale an assumed hospital arrival profile. The hospital equipment, hourly arrivals, fault location, and switching times are scenario inputs. In [`severe_stress.py`](severe_stress.py), `settings_for()` selects the longer outages, surge, fuel, and staged-pickup settings.
+
+## 3. Follow the optimization model
+
+1. Read `Model` in [`run_fault_study.py`](run_fault_study.py). It assigns treatment starts to arrival cohorts, tracks patients still in treatment, and converts treatment and essential services into electrical demand.
+2. Follow the same model into the generator, battery, fuel, and grid-import constraints. `linear_data()` uses OpenDSS to estimate how changes in hospital imports affect phase voltage and equipment loading. [`fault_network.py`](fault_network.py) implements the feeder and switching states.
+3. Read `run()` in [`severe_stress.py`](severe_stress.py) to see the objective order. For the matched 18-hour comparison, both policies first prioritize essential service. Care-first then maximizes on-time urgent starts. Energy-first maximizes treatment energy and then maximizes on-time urgent starts at the fixed energy outcome.
+
+## 4. Run and check the cases
+
+Use the virtual environment's Python executable for these commands.
+
+```sh
+python run_fault_study.py
+python compound_stress.py --replay
+python severe_stress.py --replay
+python severe_stress.py --reserve --replay
+python severe_stress.py --certificate --replay
+```
+
+These commands check the stored decisions and rerun power flow. In `run_fault_study.py`, `evaluate()` replays hourly schedules with unbalanced AC power flow at 15-minute intervals. Inspect `Fault_Results.csv` for the base-policy comparisons, `Severe_Stress_Results.csv` for longer outages, and `Severe_Tradeoff_Results.csv` for the energy bounds at maximum urgent-care coverage. For a fresh solve of one case in a separate extracted copy, use:
+
+```sh
+python severe_stress.py --event apr2024 --case long_reserve --policy coordinated --seconds 60
+```
+
+A fresh solve can stop at its time limit. Read the incumbent, bound, and AC-feasibility status before comparing it with the archived result.
+
+## 5. Trace results into the figures
+
+The main run regenerates the figure data and TikZ files. In [`build_severe_results.py`](build_severe_results.py), read `load_traces()` to trace the arrivals, hospital demand, transformer loading, and voltage scatter in Fig. 4. Then read `current_heatmap()` and `deadline_curve()` to trace equipment loading and missed urgent deadlines in Fig. 5. The inputs are the quarter-hour AC traces and treatment-start files under `extended_case_data/`. The generated figure sources are `figures/severe_load_stress.tikz`, `figures/severe_current_heatmap.tikz`, and `figures/severe_urgent_delays.tikz`.
+
+The extracted bundle includes `README.txt` with model details, data provenance files, and the feeder's upstream notice in `feeder/License.txt`.
