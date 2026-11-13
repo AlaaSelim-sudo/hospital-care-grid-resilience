@@ -1,0 +1,22 @@
+\documentclass{IEEEtran}
+\onecolumn
+\usepackage[T1]{fontenc}\usepackage{lmodern,amsmath,amssymb,booktabs,array,graphicx,tikz,pgfplots,url}
+\usetikzlibrary{patterns,arrows.meta,positioning}\usepgfplotslibrary{groupplots}\pgfplotsset{compat=1.18}
+\usepackage[hidelinks]{hyperref}\urlstyle{same}\definecolor{navy}{HTML}{193650}\definecolor{teal}{HTML}{007F86}\definecolor{orange}{HTML}{C57939}\definecolor{purple}{HTML}{725B96}\definecolor{unknown}{HTML}{DADDE1}
+\definecolor{c0}{HTML}{F4E8D9}\definecolor{c1}{HTML}{D6E8E8}\definecolor{c2}{HTML}{A4CDD0}\definecolor{c3}{HTML}{69A7B2}\definecolor{c4}{HTML}{193650}
+\setlength{\textwidth}{7.15in}
+\pagestyle{empty}
+\begin{document}
+\noindent\textbf{Fig. 1. Study workflow}\par\medskip
+\noindent\resizebox{.48\textwidth}{!}{\input{figures/care_grid_framework.tikz}}
+\clearpage
+\noindent\textbf{Fig. 2. County customer-outage-hours}\par\medskip
+\noindent\resizebox{.85\textwidth}{!}{\input{figures/county_outage_maps.tikz}}
+\clearpage
+\noindent\textbf{Fig. 3. Modified IEEE 13-node feeder}\par\medskip
+\noindent\resizebox{.43\textwidth}{!}{\input{figures/ieee13_single.tikz}}
+\clearpage
+\noindent\textbf{Fig. 5. Equipment loading and care outcomes}\par\medskip
+\noindent\scalebox{.88}{\input{figures/severe_current_heatmap.tikz}}\par\smallskip
+\noindent\scalebox{.88}{\def\ConferenceResiliencePanels{}\input{figures/severe_urgent_delays.tikz}}
+\end{document}
