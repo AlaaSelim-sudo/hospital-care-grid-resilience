@@ -46,8 +46,22 @@ python severe_stress.py --event apr2024 --case long_reserve --policy coordinated
 
 A fresh solve can stop at its time limit. Read the incumbent, bound, and AC-feasibility status before comparing it with the archived result.
 
-## 5. Trace results into the figures
+## 5. Rebuild Fig. 4 and verify its voltage results
 
-The main run regenerates the figure data and TikZ files. In [`build_severe_results.py`](build_severe_results.py), read `load_traces()` to trace the arrivals, hospital demand, transformer loading, and voltage scatter in Fig. 4. Then read `current_heatmap()` and `deadline_curve()` to trace equipment loading and missed urgent deadlines in Fig. 5. The inputs are the quarter-hour AC traces and treatment-start files under `extended_case_data/`. The generated figure sources are `figures/severe_load_stress.tikz`, `figures/severe_current_heatmap.tikz`, and `figures/severe_urgent_delays.tikz`.
+1. From the repository root, run `python fig4_final/replay/verify_voltage.py`. It checks the eight archived 15-minute voltage traces, the undervoltage hours in the 18–27 h backfeed zooms, and the April hour 22.75 comparison. The CSV `hour` column is the replay clock; subtract 12 to obtain hours from fault inception. The threshold is 0.95 p.u. and each sample represents 0.25 h.
+2. To rebuild the exact curves and markers shown in the paper, use the saved TikZ source. Change into `fig4_final` and run `pdflatex fig4.tex`. The resulting page contains the full figure. Run `pdfcrop fig4.pdf fig4-cropped.pdf` if you need a tightly cropped figure for inclusion in another document. The figure source embeds its plotting coordinates, so this build requires no solver.
+3. To recompute the newly added schedules, download and extract [the study bundle](reproduction.zip), install its requirements, and run the following commands from its root with the virtual environment active. Replace `PATH_TO_REPO` with the path to this repository. Repeat the three commands for `apr2024`.
+
+   ```sh
+   python PATH_TO_REPO/fig4_final/replay/run_matched_cases.py dec2023 long_no_surge autonomous
+   python PATH_TO_REPO/fig4_final/replay/run_matched_cases.py dec2023 long_reserve autonomous
+   python PATH_TO_REPO/fig4_final/replay/run_matched_cases.py dec2023 long_no_surge coordinated
+   ```
+
+   These commands write to `matched_case_runs/` under the extracted study directory. The surge joint care-first runs are in the original bundle and replay with `python severe_stress.py --replay --case long_reserve --policy coordinated`. A fresh solve can select a different schedule among ties. The archived CSVs are the inputs for checking the published values. The JSON and CSV files are simulated schedules and AC replay output.
+
+## 6. Trace the other result figures
+
+In [`build_severe_results.py`](build_severe_results.py), use `current_heatmap()` and `deadline_curve()` to trace equipment loading and missed urgent deadlines in Fig. 5. The inputs are the quarter-hour AC traces and treatment-start files under `extended_case_data/`. The generated sources are `figures/severe_current_heatmap.tikz` and `figures/severe_urgent_delays.tikz`.
 
 The extracted bundle includes `README.txt` with model details, data provenance files, and the feeder's upstream notice in `feeder/License.txt`.

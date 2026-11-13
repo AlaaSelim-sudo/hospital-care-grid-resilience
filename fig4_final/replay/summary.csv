@@ -1,0 +1,9 @@
+storm,policy,surge,minimum_pu,undervoltage_post_fault_h,undervoltage_during_isolation_h,undervoltage_full_replay_h
+dec2023,local,no,0.9468652780133371,18.0,0.0,26.0
+dec2023,local,yes,0.9460808570461723,16.75,0.0,24.25
+dec2023,joint care-first,no,0.9507303461962486,0.0,0.0,0.0
+dec2023,joint care-first,yes,0.9502507530818758,0.0,0.0,0.0
+apr2024,local,no,0.9451165508416612,17.25,0.0,22.25
+apr2024,local,yes,0.944831706333912,18.25,0.0,23.25
+apr2024,joint care-first,no,0.950791405630598,0.0,0.0,0.0
+apr2024,joint care-first,yes,0.9502540717533319,0.0,0.0,0.0
